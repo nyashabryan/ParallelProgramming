@@ -17,8 +17,11 @@ vpath %.class $(BINDIR)
 .java.class:
 	$(JAVAC)	$(JFLAGS) $<
 
-all: Serial.class\
-				Tree.class\
+all:
+	javac -d $(BINDIR) $(SRCDIR)/*.java
+
+runSerial:
+	java -cp $(BINDIR) Serial
 
 doc: all
 	javadoc -d $(DOCDIR) $(SRCDIR)/*.java
