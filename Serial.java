@@ -1,11 +1,13 @@
+import java.util.Scanner;
+
 public class Serial{
 
-    private int terrainXSize;
-    private int terrainYSize;
-    List<Float> sunlightHours;
-    int numberOfTrees;
-    List<Trees> trees;
-    float[][] gridSunlightHours;
+    private static int terrainXSize;
+    private static int terrainYSize;
+    static List<Float> sunlightHours;
+    static int numberOfTrees;
+    static List<Trees> trees;
+    static float[][] gridSunlightHours;
 
     public static void main(String[] args){
 
@@ -20,6 +22,14 @@ public class Serial{
 
     public static void LoadMap(){
         Scanner scanner = new Scanner(System.in);
+        String line1 = scanner.nextLine();
+        String line2 = scanner.nextLine();
+        String line3 = scanner.nextLine();
+        List<String> treeLines = new ArrayList<String>();
+        while (scanner.hasNext()){
+            treeLines.add(scanner.nextLine());
+        }
+
 
     }
 
