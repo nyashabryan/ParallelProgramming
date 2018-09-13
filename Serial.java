@@ -14,7 +14,6 @@ public class Serial{
     private static int terrainXSize;
     private static int terrainYSize;
     static int numberOfTrees;
-    static List<Tree> trees = new List<Tree>();
     static float[][] gridSunlightHours;
 
     /**
@@ -25,11 +24,12 @@ public class Serial{
     public static void main(String[] args){
 
         System.out.println("Starting");
-        LoadMap();
+        List<Tree> trees = new ArrayList<Tree>();
+        trees = LoadMap();
 
-        calculateTreeHours();
-        int average = calculateSunlightAverage();
-        printResults();
+        calculateTreeHours(trees);
+        float average = calculateSunlightAverage(trees);
+        printResults(average);
 
     }
 
@@ -38,7 +38,7 @@ public class Serial{
      * and use it to build the characteristics of the terrrain in the
      * static variables. 
      */
-    public static void LoadMap(){
+    public static List<Tree> LoadMap(){
         Scanner scanner = new Scanner(System.in);
         String line1 = scanner.nextLine();
         terrainXSize = (int) Integer.parseInt(line1.split(" ")[0]);
@@ -53,8 +53,8 @@ public class Serial{
         while (scanner.hasNext()){
             treeLines.add(scanner.nextLine());
         }
-        makeTrees(treeLines);
-
+        scanner.close();        
+        return makeTrees(treeLines);
     }
 
     /**
@@ -74,18 +74,22 @@ public class Serial{
      * Makes and fills the 
      * @param treeLines
      */
-    public static void makeTrees(List<String> treeLines){
-        if (treeLines ==  null) return ;
-        String[] details;
+    public static List<Tree> makeTrees(List<String> treeLines){
+        List<Tree> trees = new ArrayList<Tree>();
+        if (treeLines ==  null) return trees;
+        Tree tree =  new Tree(0, 0, 0);
+        trees.add(tree);
         for(String line: treeLines){
             trees.add(new Tree(line.split(" ")));
         }
+
+        return trees;
     }
 
     /**
      * Calculates the amount of sunlight that each of the trees had.
      */
-    public static void calculateTreeHours(){
+    public static void calculateTreeHours(List<Tree> trees){
         for (Tree tree: trees){
             for (int i = tree.xCorner; i < tree.xCorner + tree.canopy;
                 i++){
@@ -104,13 +108,11 @@ public class Serial{
      * Calculates the average tree sunlight hours in the terrain.
      * @return average trees sunlight hours 
      */
-    public static float calculateSunlightAverage(){
+    public static float calculateSunlightAverage(List<Tree> trees){
         float total = 0;
-        List<Trees> trees2 = trees;
-        for (Tree tree : trees2) {
-            total += trees2.sunlight;
+        for (Tree tree : trees) {
+            total += tree.sunlight;
         }
-
         return total /((float)numberOfTrees);
     }
 
@@ -119,63 +121,13 @@ public class Serial{
      * @return boolean.
      */
     public static boolean checkMapLoaded(){
-        return (sunlightHours || terrainXSize || terrainYSize ||
-            numberOfTrees || trees );
+        return (gridSunlightHours != null &&
+                terrainXSize != 0 &&
+                terrainYSize != 0 &&
+                numberOfTrees != 0);
     }
 
-
-    /**
-     * Tree class to represent all the tree objects in the terrain.
-     */
-    public class Tree{
-        
-        int xCorner;
-        int yCorner;
-        int canopy;
-        float sunlight;
-
-        /**
-         * Tree constructor using the integer values of the tree 
-         * characteristics.
-         * @param xCorner
-         * @param yCorner
-         * @param canopy
-         */
-        public Tree(int xCorner, int yCorner, int canopy){
-            this.xCorner = xCorner;
-            this.yCorner = yCorner;
-            this.canopy = canopy;
-        }
-
-        /**
-         * Another constructor for the Tree object. 
-         * @param details integer array containing the xCorner, yCorner 
-         * and the canopy values of the Tree. 
-         */
-        public Tree(int[] details){
-            if (details.length < 3){
-                Tree(0, 0, 0);
-            }
-            else{
-                Tree(details[0], details[1], details[2]);
-            }
-        }
-
-        /**
-         * Another constructor for the Tree object.
-         * @param details string array containing the xCorner, yCorner and
-         * the canopy values of the tree.
-         */
-        public Tree(String[] details){
-            if (details.length < 3){
-                Tree(0, 0, 0);
-            }else{
-                Tree(
-                    (int)Integer.parseInt(details[0]),
-                    (int)Integer.parseInt(details[1]),
-                    (int)Integer.parseInt(details[2])
-                );
-            }
-        }
+    public static void printResults(float average){
+        System.out.println(average);
     }
 }
