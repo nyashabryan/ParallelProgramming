@@ -1,7 +1,12 @@
 import java.util.Scanner;
+
 import java.util.List;
 import java.util.ArrayList;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * @author Nyasha Bryan Katemauswa <address nyashabryan23@gmail.com>
@@ -27,9 +32,19 @@ public class Serial{
         List<Tree> trees = new ArrayList<Tree>();
         trees = LoadMap();
 
+        System.out.println("Calculating tree hours and average.....");
+        System.gc();
+
+        // Computations start
+        long initTime = System.currentTimeMillis();
+        
         calculateTreeHours(trees);
         float average = calculateSunlightAverage(trees);
-        printResults(average);
+        
+        long duration = System.currentTimeMillis() - initTime;
+        
+        System.out.println("Printing results.....");
+        printResults(average, trees, duration);
 
     }
 
@@ -39,23 +54,47 @@ public class Serial{
      * static variables. 
      */
     public static List<Tree> LoadMap(){
-        Scanner scanner = new Scanner(System.in);
-        String line1 = scanner.nextLine();
-        terrainXSize = (int) Integer.parseInt(line1.split(" ")[0]);
-        terrainYSize = (int) Integer.parseInt(line1.split(" ")[1]);
-        
-        makeGrid(scanner.nextLine().split(" "));
+        System.out.println("Loading Map.....");
+        BufferedReader reader;
+        try {
+            reader =  new BufferedReader(new FileReader("sample_input.txt"));
+            String line1;
+            line1 = reader.readLine();
+            terrainXSize = (int) Integer.parseInt(line1.split(" ")[0]);
+            terrainYSize = (int) Integer.parseInt(line1.split(" ")[1]);
+            
+            System.out.println("Making Grid.....");
+            makeGrid(reader.readLine().split(" "));                
+            String line3 = reader.readLine();
+            numberOfTrees = (int) Integer.parseInt(line3.trim());
+            
 
-        String line3 = scanner.nextLine();
-        numberOfTrees = (int) Integer.parseInt(line3.trim());
         
-        List<String> treeLines = new ArrayList<String>();
-        while (scanner.hasNext()){
-            treeLines.add(scanner.nextLine());
+            System.out.println("Scanning lines");
+            List<String> treeLines = new ArrayList<String>();
+            int i = 0;
+            String xline;
+            while (true){
+                i++;
+                xline = reader.readLine();
+                if (xline == null) break;
+                treeLines.add(xline);
+                if (i % 1000 == 0) System.out.println(i);
+            }
+            reader.close();
+
+            System.out.println("Making trees.....");
+            return makeTrees(treeLines);
+        
+        }catch (FileNotFoundException e){
+            System.out.println(e.toString());
+            return new ArrayList<Tree>();
+        }catch (IOException e){
+            System.out.println(e);
+            return new ArrayList<Tree>();
         }
-        scanner.close();        
-        return makeTrees(treeLines);
-    }
+    }     
+        
 
     /**
      * Makes and fills in the gridSunlightHours static variable from a line
@@ -63,9 +102,15 @@ public class Serial{
      * @param line String array of the sunlight hours as floats
      */
     public static void makeGrid(String[] line){
+        
+        gridSunlightHours = new float[terrainXSize][terrainYSize];
+        System.out.println(line.length);
+        System.out.println(terrainXSize);
+        System.out.println(terrainYSize);
         for (int i = 0; i < terrainXSize; i++){
-            for(int j = 0; i < terrainYSize; j++){
-                gridSunlightHours[i][j] = Float.parseFloat(line[i+j]);
+            System.out.println(i);
+            for(int j = 0; j < terrainYSize; j++){
+                gridSunlightHours[i][j] = Float.parseFloat(line[(i)* (terrainYSize) + j]);
             }
         }
     }
@@ -76,11 +121,11 @@ public class Serial{
      */
     public static List<Tree> makeTrees(List<String> treeLines){
         List<Tree> trees = new ArrayList<Tree>();
+        Tree tree;
         if (treeLines ==  null) return trees;
-        Tree tree =  new Tree(0, 0, 0);
-        trees.add(tree);
         for(String line: treeLines){
-            trees.add(new Tree(line.split(" ")));
+            tree = Tree.newTree(line.split(" "));
+            if (tree != null) trees.add(tree);
         }
 
         return trees;
@@ -94,8 +139,8 @@ public class Serial{
             for (int i = tree.xCorner; i < tree.xCorner + tree.canopy;
                 i++){
                 if (i > terrainXSize - 1) continue;
-                for (int j = tree.yCorner; i < tree.yCorner + tree.canopy;
-                i++){
+                for (int j = tree.yCorner; j < tree.yCorner + tree.canopy;
+                j++){
                     if (j > terrainYSize -1) continue;
                     tree.sunlight += gridSunlightHours[i][j];
                 }
@@ -127,7 +172,12 @@ public class Serial{
                 numberOfTrees != 0);
     }
 
-    public static void printResults(float average){
+    public static void printResults(float average, List<Tree> trees, long duration){
+        System.out.println("Computation took " + Long.toString(duration));
         System.out.println(average);
+        System.out.println(trees.size());
+        for (Tree tree: trees){
+            System.out.println(tree.sunlight);
+        }
     }
 }

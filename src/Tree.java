@@ -40,10 +40,17 @@ public class Tree{
      * @param details string array containing the xCorner, yCorner and
      * the canopy values of the tree.
      */
-    public Tree(String[] details){
-        this.xCorner = (int)Integer.parseInt(details[0]);
-        this.yCorner = (int)Integer.parseInt(details[1]);
-        this.canopy = (int)Integer.parseInt(details[2]);
+    public static Tree newTree(String[] details){
+        try{
+            
+            int xCorner = (int)Integer.parseInt(details[0]);
+            int yCorner = (int)Integer.parseInt(details[1]);
+            int canopy = (int)Integer.parseInt(details[2]);
+            return new Tree(xCorner, yCorner, canopy);
+        }catch (NumberFormatException e){
+            System.out.println(e);
+            return null;
+        }
     }
 
 }
