@@ -23,6 +23,9 @@ all:
 runSerial:
 	java -cp $(BINDIR) Serial
 
+runThreadedApp:
+	java -cp $(BINDIR) ThreadedApp
+
 doc: all
 	javadoc -d $(DOCDIR) $(SRCDIR)/*.java
 
