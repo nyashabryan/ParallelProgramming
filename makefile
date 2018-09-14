@@ -20,11 +20,14 @@ vpath %.class $(BINDIR)
 all:
 	javac -d $(BINDIR) $(SRCDIR)/*.java
 
-runSerial:
+runSerialApp:
 	java -cp $(BINDIR) Serial
 
 runThreadedApp:
 	java -cp $(BINDIR) ThreadedApp
+
+runForkedApp:
+	java -cp $(BINDIR) ForkedApp
 
 doc: all
 	javadoc -d $(DOCDIR) $(SRCDIR)/*.java
