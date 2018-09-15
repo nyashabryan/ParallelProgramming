@@ -80,7 +80,6 @@ public class Serial{
                 xline = reader.readLine();
                 if (xline == null) break;
                 treeLines.add(xline);
-                if (i % 1000 == 0) System.out.println(i);
             }
             reader.close();
 
@@ -109,7 +108,6 @@ public class Serial{
         System.out.println(terrainXSize);
         System.out.println(terrainYSize);
         for (int i = 0; i < terrainXSize; i++){
-            System.out.println(i);
             for(int j = 0; j < terrainYSize; j++){
                 gridSunlightHours[i][j] = Float.parseFloat(line[(i)* (terrainYSize) + j]);
             }

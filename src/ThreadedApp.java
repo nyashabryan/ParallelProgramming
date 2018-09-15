@@ -17,7 +17,7 @@ public class ThreadedApp{
 
     private static int terrainXSize;
     private static int terrainYSize;
-    static int numberOfTrees;
+    private static int numberOfTrees;
     static float[][] gridSunlightHours;
     private static int SEQUENCIAL_CUTOFF;
     /**
@@ -27,19 +27,15 @@ public class ThreadedApp{
     public static void main(String[] args){
 
         System.out.println("Starting");
-        List<Tree> trees = LoadMap();
+        Tree[] trees = LoadMap();
 
         System.out.println("Calculating tree hours and average.....");
         System.gc();
-        ThreadedApp.SEQUENCIAL_CUTOFF = trees.size() + 1;
+        ThreadedApp.SEQUENCIAL_CUTOFF = trees.length/2;
         System.out.println(SEQUENCIAL_CUTOFF);
-        // Computations start
-        
 
+        // Computations start
         calculateTreeHours(trees);
-        for (Tree tree: trees){
-            //System.out.println(tree.sunlight);
-        }
 
         long initTime = System.currentTimeMillis();
         float average = calculateSunlightAverage(trees);
@@ -51,57 +47,48 @@ public class ThreadedApp{
         
     }
 
-    public static float calculateSunlightAverage(List<Tree> trees){
-        AverageHoursCalculator runner = new AverageHoursCalculator(trees);
+    public static float calculateSunlightAverage(Tree[] trees){
+        SumHoursCalculator runner = new SumHoursCalculator(
+            trees, 0, trees.length
+        );
         runner.run();
-        try{
-            runner.join();
-        } catch (InterruptedException e){
-            System.out.println(e);
-            return 0;
-        }
-        return runner.average;
+        return runner.sum / (float)numberOfTrees;
     }
 
-    public static class AverageHoursCalculator extends Thread{
+    public static class SumHoursCalculator extends Thread{
 
-        List<Tree> trees;
-        float average;
+        Tree[] trees;
+        int high;
+        int low;
+        int sum;
 
-        AverageHoursCalculator(List<Tree> trees){
+        SumHoursCalculator(Tree[] trees, int low, int high){
             this.trees = trees;
+            this.low = low;
+            this.high = high;
         }
 
         public void run(){
-            if (trees.size() > SEQUENCIAL_CUTOFF){
-                AverageHoursCalculator left = new AverageHoursCalculator(
-                    trees.subList(0, trees.size()/2)
+            if (high - low > SEQUENCIAL_CUTOFF){
+                SumHoursCalculator left = new SumHoursCalculator(
+                    trees, low, (high + low)/2
                 );
-                AverageHoursCalculator right = new AverageHoursCalculator(
-                    trees.subList(trees.size()/2, trees.size()-1)
+                SumHoursCalculator right = new SumHoursCalculator(
+                    trees, (high + low)/2, high
                 );
-
-                left.start();
-                right.start();
-                try{
-                    left.join();
-                } catch(InterruptedException e){
-                    System.out.println(e);
-                }
                 
+                right.start();
+                left.run();
                 try{
                     right.join();
-                }catch(InterruptedException e){
+                } catch(InterruptedException e){
                     System.out.println(e);
-                }
-                
-                this.average = left.average + right.average;
+                }                
+                this.sum = left.sum + right.sum;
+
             }else{
-                float total = 0;
-                for (Tree tree : trees) {
-                    total += tree.sunlight;
-                }
-                this.average = total /((float)ThreadedApp.numberOfTrees);
+                for (int i = low; i < high; i++)
+                this.sum += trees[i].sunlight;
             }
         }
 
@@ -110,8 +97,12 @@ public class ThreadedApp{
     /**
      * Calculates the amount of sunlight that each of the trees had.
      */
-    public static void calculateTreeHours(List<Tree> trees){
+    public static void calculateTreeHours(Tree[] trees){
         for (Tree tree: trees){
+            if (tree == null) {
+                System.out.println("Found a null");
+                continue;
+            }
             for (int i = tree.xCorner; i < tree.xCorner + tree.canopy;
                 i++){
                 if (i > terrainXSize - 1) continue;
@@ -130,7 +121,7 @@ public class ThreadedApp{
      * and use it to build the characteristics of the terrrain in the
      * static variables. 
      */
-    public static List<Tree> LoadMap(){
+    public static Tree[] LoadMap(){
         System.out.println("Loading Map.....");
         BufferedReader reader;
         try {
@@ -149,12 +140,10 @@ public class ThreadedApp{
         
             System.out.println("Scanning lines");
             List<String> treeLines = new ArrayList<String>();
-            int i = 0;
             String xline;
             while (true){
-                i++;
                 xline = reader.readLine();
-                if (xline == null) break;
+                if (xline == null || xline.equals("")) break;
                 treeLines.add(xline);
             }
             reader.close();
@@ -164,10 +153,10 @@ public class ThreadedApp{
         
         }catch (FileNotFoundException e){
             System.out.println(e.toString());
-            return new ArrayList<Tree>();
+            return new Tree[numberOfTrees];
         }catch (IOException e){
             System.out.println(e);
-            return new ArrayList<Tree>();
+            return new Tree[numberOfTrees];
         }
     }
 
@@ -191,18 +180,19 @@ public class ThreadedApp{
     }
 
     /**
-     * Makes and fills the 
+     * Makes and fills the trees array.
      * @param treeLines
      */
-    public static List<Tree> makeTrees(List<String> treeLines){
-        List<Tree> trees = new ArrayList<Tree>();
-        Tree tree;
+    public static Tree[] makeTrees(List<String> treeLines){
+        Tree[] trees = new Tree[numberOfTrees];
         if (treeLines ==  null) return trees;
-        for(String line: treeLines){
-            tree = Tree.newTree(line.split(" "));
-            if (tree != null) trees.add(tree);
+        Tree tree = null;
+        String[] line;
+        for (int i = 0; i < numberOfTrees; i++){
+            line = treeLines.get(i).split(" ");
+            if (line.length > 2) tree = Tree.newTree(line);
+            if (tree != null) trees[i] = tree;
         }
-
         return trees;
     }
 
@@ -212,10 +202,10 @@ public class ThreadedApp{
      * @param trees The list of the trees in the terrain.
      * @param duration The time it took for all the computation in the experiment.
      */
-    public static void printResults(float average, List<Tree> trees, long duration){
+    public static void printResults(float average, Tree[] trees, long duration){
         System.out.println("Computation took " + Long.toString(duration));
         System.out.println(average);
-        System.out.println(trees.size());
+        System.out.println(trees.length);
         for (Tree tree: trees){
         //    System.out.println(tree.sunlight);
         }
