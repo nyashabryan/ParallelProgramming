@@ -73,12 +73,10 @@ public class Serial{
         
             System.out.println("Scanning lines");
             List<String> treeLines = new ArrayList<String>();
-            int i = 0;
             String xline;
             while (true){
-                i++;
                 xline = reader.readLine();
-                if (xline == null) break;
+                if (xline == null || xline == "") break;
                 treeLines.add(xline);
             }
             reader.close();
