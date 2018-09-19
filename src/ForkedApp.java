@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Arrays;
 import java.util.concurrent.RecursiveTask;
 import java.util.ArrayList;
 import java.lang.RuntimeException;
@@ -24,21 +25,33 @@ public class ForkedApp{
     static float[][] gridSunlightHours;
     private static int SEQUENCIAL_CUTOFF;
     static final ForkJoinPool pool = new ForkJoinPool();
-
+    private static int SET_NUMBER;
+    private static int THREAD_NUMBER;
     /**
      * The application main method.
      * @param args
      */
     public static void main(String[] args){
 
+        if (args.length > 1){
+            SET_NUMBER = Integer.parseInt(args[0]);
+            THREAD_NUMBER = Integer.parseInt(args[1]);
+        }else{
+            SET_NUMBER = 0;
+            THREAD_NUMBER = 0;
+        }
+
         System.out.println("Starting");
         Tree[] trees = LoadMap();
 
+        if (SET_NUMBER != 0) trees = Arrays.copyOfRange(trees, 0, SET_NUMBER + 1);
+        if (THREAD_NUMBER == 0) THREAD_NUMBER = 2;
+
+        SEQUENCIAL_CUTOFF = trees.length/THREAD_NUMBER;
+        System.out.println(SEQUENCIAL_CUTOFF);
+        
         System.out.println("Calculating tree hours and average.....");
         System.gc();
-        SEQUENCIAL_CUTOFF = trees.length/2;
-        System.out.println(SEQUENCIAL_CUTOFF);
-
         calculateTreeHours(trees);
 
         // Computations start
