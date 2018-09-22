@@ -51,20 +51,19 @@ public class ForkedApp{
         System.gc();
 
         long initTime = System.currentTimeMillis();
-        float average = calculateSunlightAverage(trees);
+        int sum = calculateSunlightSum(trees);
         long duration = System.currentTimeMillis() - initTime;
-        
+        float average = sum /(float) numberOfTrees;
         printResults(average, duration);
         
     }
 
-    public static float calculateSunlightAverage(Tree[] trees){
-        return pool.invoke(new SumHoursCalculator(trees, 0, trees.length))/numberOfTrees;
+    public static int calculateSunlightSum(Tree[] trees){
+        return pool.invoke(new SumHoursCalculator(trees, 0, trees.length));
     }
 
     public static class SumHoursCalculator extends RecursiveTask<Integer>{
         Tree[] trees;
-        int sum;
         int low;
         int high;
 
@@ -94,6 +93,7 @@ public class ForkedApp{
                 return leftAns + rightAns;
 
             }else{
+                int sum = 0;
                 for (int i = low; i < high; i++)
                 sum += trees[i].sunlight;
                 return sum;
@@ -135,17 +135,19 @@ public class ForkedApp{
             
             makeGrid(reader.readLine().split(" "));                
             String line3 = reader.readLine();
-            System.out.println(numberOfTrees);
             if (numberOfTrees == 0)
                 numberOfTrees = (int) Integer.parseInt(line3.trim());
             
             List<String> treeLines = new ArrayList<String>();
             String xline;
+            System.out.println(numberOfTrees);
             for (int i = 0; i < numberOfTrees; i++){
                 xline = reader.readLine();
                 if (xline == null || xline == "") break;
                 treeLines.add(xline);
             }
+            if (treeLines.size() != numberOfTrees)
+                System.out.println("Number of trees not equal to treeLines");
             reader.close();
             return makeTrees(treeLines);
         

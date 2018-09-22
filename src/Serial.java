@@ -21,7 +21,6 @@ public class Serial{
     private static int numberOfTrees;
     private static float[][] gridSunlightHours;
     private static String INPUT_FILE = "sample_input.txt";
-    private static int SET_NUMBER;
 
     /**
      * Serial Application Main Method.
@@ -38,14 +37,14 @@ public class Serial{
         }
 
         Tree[] trees = LoadMap();
-
-        // Computations start
         calculateTreeHours(trees);
         System.gc();
+
         long initTime = System.currentTimeMillis();
         int sum = calculateSunlightSum(trees);
         long duration = System.currentTimeMillis() - initTime;
         float average = sum /((float)numberOfTrees);
+        System.out.println(sum);
         printResults(average, duration);
 
     }
@@ -72,6 +71,7 @@ public class Serial{
         
             List<String> treeLines = new ArrayList<String>();
             String xline;
+            System.out.println(numberOfTrees);
             for (int i = 0; i < numberOfTrees; i++){
                 xline = reader.readLine();
                 if (xline == null || xline == "") break;

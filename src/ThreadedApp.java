@@ -20,7 +20,6 @@ public class ThreadedApp{
     private static int numberOfTrees;
     static float[][] gridSunlightHours;
     private static int SEQUENCIAL_CUTOFF;
-    private static int SET_NUMBER;
     private static int THREAD_NUMBER;
     private static String INPUT_FILE = "sample_input.txt";
     private static Tree[] trees;
@@ -31,38 +30,38 @@ public class ThreadedApp{
     public static void main(String[] args){
 
         if (args.length > 1){
-            SET_NUMBER = Integer.parseInt(args[0]);
+            numberOfTrees = Integer.parseInt(args[0]);
             THREAD_NUMBER = Integer.parseInt(args[1]);
         }else{
-            SET_NUMBER = 0;
+            numberOfTrees = 0;
             THREAD_NUMBER = 2;
         }
-        numberOfTrees = SET_NUMBER;
         trees = LoadMap();
-        SEQUENCIAL_CUTOFF = trees.length/THREAD_NUMBER;
-        System.out.println(SEQUENCIAL_CUTOFF);
-
-        // Computations start
         calculateTreeHours(trees);
+
+        SEQUENCIAL_CUTOFF = trees.length/THREAD_NUMBER;
+
         System.gc();
+        // Computations start
+        
         long initTime = System.currentTimeMillis();
-        float average = calculateSunlightAverage(trees);
+        int sum = calculateSunlightSum(trees);
         long duration = System.currentTimeMillis() - initTime;
+        float average = sum /(float)numberOfTrees;
+        System.out.println(sum);
         printResults(average, duration);
         
     }
 
-    public static float calculateSunlightAverage(Tree[] trees){
+    public static int calculateSunlightSum(Tree[] trees){
         SumHoursCalculator runner = new SumHoursCalculator(
             0, trees.length
         );
         runner.run();
-        return runner.sum / (float)numberOfTrees;
+        return runner.sum;
     }
 
     public static class SumHoursCalculator extends Thread{
-
-        Tree[] trees;
         int high;
         int low;
         int sum;
@@ -70,6 +69,7 @@ public class ThreadedApp{
         SumHoursCalculator(int low, int high){
             this.low = low;
             this.high = high;
+            this.sum = 0;
         }
 
         public void run(){
@@ -77,10 +77,11 @@ public class ThreadedApp{
                 SumHoursCalculator left = new SumHoursCalculator(
                     low, (high + low)/2
                 );
+                System.out.println(left.high);
                 SumHoursCalculator right = new SumHoursCalculator(
                     (high + low)/2, high
                 );
-                
+                System.out.println(right.high);
                 right.start();
                 left.run();
                 try{
@@ -93,6 +94,7 @@ public class ThreadedApp{
             }else{
                 for (int i = low; i < high; i++)
                 this.sum += ThreadedApp.trees[i].sunlight;
+                System.out.println(sum);
             }
         }
 
@@ -103,6 +105,10 @@ public class ThreadedApp{
      */
     public static void calculateTreeHours(Tree[] trees){
         for (Tree tree: trees){
+            if (tree == null) {
+                System.out.println("Found a null");
+                continue;
+            }
             for (int i = tree.xCorner; i < tree.xCorner + tree.canopy;
                 i++){
                 if (i > terrainXSize - 1) continue;
@@ -136,11 +142,14 @@ public class ThreadedApp{
             
             List<String> treeLines = new ArrayList<String>();
             String xline;
+            System.out.println(numberOfTrees);
             for (int i = 0; i < numberOfTrees; i++){
                 xline = reader.readLine();
                 if (xline == null || xline == "") break;
                 treeLines.add(xline);
             }
+            if (treeLines.size() != numberOfTrees)
+                System.out.println("Number of trees not equal to treeLines");
             reader.close();
             return makeTrees(treeLines);
         
