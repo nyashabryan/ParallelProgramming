@@ -22,6 +22,8 @@ public class ThreadedApp{
     private static int SEQUENCIAL_CUTOFF;
     private static int SET_NUMBER;
     private static int THREAD_NUMBER;
+    private static String INPUT_FILE = "sample_input.txt";
+    private static Tree[] trees;
     /**
      * The application main method.
      * @param args
@@ -33,38 +35,26 @@ public class ThreadedApp{
             THREAD_NUMBER = Integer.parseInt(args[1]);
         }else{
             SET_NUMBER = 0;
-            THREAD_NUMBER = 0;
+            THREAD_NUMBER = 2;
         }
-
-        System.out.println("Starting");
-        Tree[] trees = LoadMap();
-
-        if (SET_NUMBER != 0) trees = Arrays.copyOfRange(trees, 0, SET_NUMBER);
-        if (THREAD_NUMBER == 0) THREAD_NUMBER = 2;
-        
+        numberOfTrees = SET_NUMBER;
+        trees = LoadMap();
         SEQUENCIAL_CUTOFF = trees.length/THREAD_NUMBER;
         System.out.println(SEQUENCIAL_CUTOFF);
 
-        System.out.println("Calculating tree hours and average.....");
-        System.gc();
-
-
         // Computations start
         calculateTreeHours(trees);
-
+        System.gc();
         long initTime = System.currentTimeMillis();
         float average = calculateSunlightAverage(trees);
-        
         long duration = System.currentTimeMillis() - initTime;
-        
-        System.out.println("Printing results.....");
-        printResults(average, trees, duration);
+        printResults(average, duration);
         
     }
 
     public static float calculateSunlightAverage(Tree[] trees){
         SumHoursCalculator runner = new SumHoursCalculator(
-            trees, 0, trees.length
+            0, trees.length
         );
         runner.run();
         return runner.sum / (float)numberOfTrees;
@@ -77,8 +67,7 @@ public class ThreadedApp{
         int low;
         int sum;
 
-        SumHoursCalculator(Tree[] trees, int low, int high){
-            this.trees = trees;
+        SumHoursCalculator(int low, int high){
             this.low = low;
             this.high = high;
         }
@@ -86,10 +75,10 @@ public class ThreadedApp{
         public void run(){
             if (high - low > SEQUENCIAL_CUTOFF){
                 SumHoursCalculator left = new SumHoursCalculator(
-                    trees, low, (high + low)/2
+                    low, (high + low)/2
                 );
                 SumHoursCalculator right = new SumHoursCalculator(
-                    trees, (high + low)/2, high
+                    (high + low)/2, high
                 );
                 
                 right.start();
@@ -98,12 +87,12 @@ public class ThreadedApp{
                     right.join();
                 } catch(InterruptedException e){
                     System.out.println(e);
-                }                
+                }
                 this.sum = left.sum + right.sum;
 
             }else{
                 for (int i = low; i < high; i++)
-                this.sum += trees[i].sunlight;
+                this.sum += ThreadedApp.trees[i].sunlight;
             }
         }
 
@@ -114,10 +103,6 @@ public class ThreadedApp{
      */
     public static void calculateTreeHours(Tree[] trees){
         for (Tree tree: trees){
-            if (tree == null) {
-                System.out.println("Found a null");
-                continue;
-            }
             for (int i = tree.xCorner; i < tree.xCorner + tree.canopy;
                 i++){
                 if (i > terrainXSize - 1) continue;
@@ -137,33 +122,26 @@ public class ThreadedApp{
      * static variables. 
      */
     public static Tree[] LoadMap(){
-        System.out.println("Loading Map.....");
         BufferedReader reader;
         try {
-            reader =  new BufferedReader(new FileReader("sample_input.txt"));
-            String line1;
-            line1 = reader.readLine();
+            reader =  new BufferedReader(new FileReader(INPUT_FILE));
+            String line1 = reader.readLine();
             terrainXSize = (int) Integer.parseInt(line1.split(" ")[0]);
             terrainYSize = (int) Integer.parseInt(line1.split(" ")[1]);
             
-            System.out.println("Making Grid.....");
             makeGrid(reader.readLine().split(" "));                
             String line3 = reader.readLine();
-            numberOfTrees = (int) Integer.parseInt(line3.trim());
+            if (numberOfTrees == 0)
+                numberOfTrees = (int) Integer.parseInt(line3.trim());
             
-
-        
-            System.out.println("Scanning lines");
             List<String> treeLines = new ArrayList<String>();
             String xline;
-            while (true){
+            for (int i = 0; i < numberOfTrees; i++){
                 xline = reader.readLine();
-                if (xline == null || xline.equals("")) break;
+                if (xline == null || xline == "") break;
                 treeLines.add(xline);
             }
             reader.close();
-
-            System.out.println("Making trees.....");
             return makeTrees(treeLines);
         
         }catch (FileNotFoundException e){
@@ -184,9 +162,6 @@ public class ThreadedApp{
     public static void makeGrid(String[] line){
         
         gridSunlightHours = new float[terrainXSize][terrainYSize];
-        System.out.println(line.length);
-        System.out.println(terrainXSize);
-        System.out.println(terrainYSize);
         for (int i = 0; i < terrainXSize; i++){
             for(int j = 0; j < terrainYSize; j++){
                 gridSunlightHours[i][j] = Float.parseFloat(line[(i)* (terrainYSize) + j]);
@@ -214,15 +189,22 @@ public class ThreadedApp{
     /**
      * Method to print the results of the experiment.
      * @param average The average exposure hours of the trees in the terrain.
-     * @param trees The list of the trees in the terrain.
      * @param duration The time it took for all the computation in the experiment.
      */
-    public static void printResults(float average, Tree[] trees, long duration){
-        System.out.println("Computation took " + Long.toString(duration));
-        System.out.println(average);
-        System.out.println(trees.length);
-        for (Tree tree: trees){
-        //    System.out.println(tree.sunlight);
+    public static void printResults(float average, long duration){
+        System.out.print(numberOfTrees);
+        System.out.print(",");
+        System.out.print(average);
+        System.out.print(",");
+        System.out.print(Long.toString(duration));
+        System.out.print(",");
+        System.out.println(THREAD_NUMBER);
+
+    }
+
+    public static void printTrees(Tree[] trees){
+        for(Tree tree: trees){
+            System.out.println(tree);
         }
     }
 

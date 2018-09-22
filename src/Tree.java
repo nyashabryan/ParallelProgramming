@@ -53,4 +53,10 @@ public class Tree{
         }
     }
 
+    public String toString(){
+        return String.format(
+            "%d %d %d", this.xCorner, this.yCorner, this.canopy
+        );
+    }
+
 }
