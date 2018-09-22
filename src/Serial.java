@@ -30,23 +30,22 @@ public class Serial{
      */
     public static void main(String[] args){
 
-        if (args.length > 1){
-            SET_NUMBER = Integer.parseInt(args[0]);
+        if (args.length > 0){
+            numberOfTrees = Integer.parseInt(args[0]);
         }
         else{
-            SET_NUMBER = 0;
+            numberOfTrees = 0;
         }
 
-        numberOfTrees = SET_NUMBER;
-        Tree[] trees;
-        trees = LoadMap();
+        Tree[] trees = LoadMap();
 
         // Computations start
         calculateTreeHours(trees);
         System.gc();
         long initTime = System.currentTimeMillis();
-        float average = calculateSunlightAverage(trees);
+        int sum = calculateSunlightSum(trees);
         long duration = System.currentTimeMillis() - initTime;
+        float average = sum /((float)numberOfTrees);
         printResults(average, duration);
 
     }
@@ -78,6 +77,8 @@ public class Serial{
                 if (xline == null || xline == "") break;
                 treeLines.add(xline);
             }
+            if (treeLines.size() != numberOfTrees)
+                System.out.println("Number of trees not equal to treeLines");
             reader.close();
         
             return makeTrees(treeLines);
@@ -150,12 +151,12 @@ public class Serial{
      * Calculates the average tree sunlight hours in the terrain.
      * @return average trees sunlight hours 
      */
-    public static float calculateSunlightAverage(Tree[] trees){
-        float total = 0;
+    public static int calculateSunlightSum(Tree[] trees){
+        int total = 0;
         for (int i = 0; i < trees.length; i++){
             total += trees[i].sunlight;
         }
-        return total /((float)numberOfTrees);
+        return total;
     }
 
     public static void printResults(float average, long duration){
