@@ -48,7 +48,6 @@ public class ThreadedApp{
         int sum = calculateSunlightSum(trees);
         long duration = System.currentTimeMillis() - initTime;
         float average = sum /(float)numberOfTrees;
-        System.out.println(sum);
         printResults(average, duration);
         
     }
@@ -77,11 +76,9 @@ public class ThreadedApp{
                 SumHoursCalculator left = new SumHoursCalculator(
                     low, (high + low)/2
                 );
-                System.out.println(left.high);
                 SumHoursCalculator right = new SumHoursCalculator(
                     (high + low)/2, high
                 );
-                System.out.println(right.high);
                 right.start();
                 left.run();
                 try{
@@ -94,7 +91,6 @@ public class ThreadedApp{
             }else{
                 for (int i = low; i < high; i++)
                 this.sum += ThreadedApp.trees[i].sunlight;
-                System.out.println(sum);
             }
         }
 
@@ -142,7 +138,6 @@ public class ThreadedApp{
             
             List<String> treeLines = new ArrayList<String>();
             String xline;
-            System.out.println(numberOfTrees);
             for (int i = 0; i < numberOfTrees; i++){
                 xline = reader.readLine();
                 if (xline == null || xline == "") break;

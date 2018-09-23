@@ -44,7 +44,6 @@ public class Serial{
         int sum = calculateSunlightSum(trees);
         long duration = System.currentTimeMillis() - initTime;
         float average = sum /((float)numberOfTrees);
-        System.out.println(sum);
         printResults(average, duration);
 
     }
@@ -71,7 +70,6 @@ public class Serial{
         
             List<String> treeLines = new ArrayList<String>();
             String xline;
-            System.out.println(numberOfTrees);
             for (int i = 0; i < numberOfTrees; i++){
                 xline = reader.readLine();
                 if (xline == null || xline == "") break;
