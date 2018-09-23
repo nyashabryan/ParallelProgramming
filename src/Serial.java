@@ -157,6 +157,12 @@ public class Serial{
         return total;
     }
 
+
+    /**
+     * Method to print the results of the experiment.
+     * @param average The average exposure hours of the trees in the terrain.
+     * @param duration The time it took for all the computation in the experiment.
+     */
     public static void printResults(float average, long duration){
         System.out.print(numberOfTrees);
         System.out.print(",");
@@ -165,6 +171,10 @@ public class Serial{
         System.out.println(Long.toString(duration));
     }
 
+    /**
+     * Prints out the trees in my list.
+     * @param trees
+     */
     public static void printTrees(Tree[] trees){
         for(Tree tree: trees){
             System.out.println(tree);

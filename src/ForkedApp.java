@@ -58,6 +58,11 @@ public class ForkedApp{
         
     }
 
+    /**
+     * Method to calculate the sum of all the solar exposure of all trees.
+     * @param trees The list of all the trees to get total exposure
+     * @return sum The total of all exposure
+     */
     public static int calculateSunlightSum(Tree[] trees){
         return pool.invoke(new SumHoursCalculator(trees, 0, trees.length));
     }
@@ -73,6 +78,11 @@ public class ForkedApp{
             this.high = high;
         }
 
+        /**
+         * Overide the default compute method of the Recursive Task class.
+         * @return Integer The sum from the invoked pool of threads
+         */
+        @Override
         protected Integer compute(){
             if (high - low > SEQUENCIAL_CUTOFF){
                 SumHoursCalculator left = new SumHoursCalculator(
@@ -206,6 +216,10 @@ public class ForkedApp{
         System.out.println(THREAD_NUMBER);
     }
 
+    /**
+     * Prints out the trees in my list.
+     * @param trees
+     */
     public static void printTrees(Tree[] trees){
         for(Tree tree: trees){
             System.out.println(tree);

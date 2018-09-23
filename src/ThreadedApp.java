@@ -205,7 +205,11 @@ public class ThreadedApp{
         System.out.println(THREAD_NUMBER);
 
     }
-
+    
+    /**
+     * Prints out the trees in my list.
+     * @param trees
+     */
     public static void printTrees(Tree[] trees){
         for(Tree tree: trees){
             System.out.println(tree);
