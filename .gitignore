@@ -4,3 +4,5 @@ doc
 *.txt
 *.log
 .vscode/
+*.pdf
+*.tar.gz
