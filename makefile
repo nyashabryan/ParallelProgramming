@@ -6,8 +6,8 @@ BINDIR = bin
 DOCDIR = doc
 TESTDIR = test
 
-JAVAC = javac4
-JFLAGS = -g -d $(BINDIR) -cp $(BINDIR):$(JUNIT)
+JAVAC = javac
+JFLAGS = -g -d $(BINDIR) -cp $(BINDIR)
 
 vpath %.java $(SRCDIR):$(TESTDIR)
 vpath %.class $(BINDIR)
@@ -17,8 +17,10 @@ vpath %.class $(BINDIR)
 .java.class:
 	$(JAVAC)	$(JFLAGS) $<
 
-all:
-	javac -d $(BINDIR) $(SRCDIR)/*.java
+all: Tree.class\
+	Serial.class\
+	ForkedApp.class\
+	ThreadedApp.class
 
 runSerialApp:
 	java -cp $(BINDIR) Serial
